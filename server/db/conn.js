@@ -1,23 +1,13 @@
-const {MongoClient} = require('mongodb');
+const mysql = require('mysql');
 require('dotenv').config();
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, {useNewUrlParser:true, useUnifiedTopology: true});
+const pool = mysql.createPool({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  socketPath: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`
+});
 
-let dbConnect;
+module.exports = pool;
 
-module.exports = {
-  connectToServer: function(callback) {
-    client.connect(function(err, db) {
-      if (err || !db) {
-        return callback(err);
-      }
-      dbConnect = db.db(`${process.env.DB_NAME}`);
-      console.log('connected to database');
-      return callback();
-    });
-  },
-  getDb: function() {
-    return dbConnect;
-  }
-};
+
